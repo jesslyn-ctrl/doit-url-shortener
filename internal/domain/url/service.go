@@ -94,6 +94,34 @@ func (s *Service) CreateShortURL(
 	return u, nil
 }
 
+// Resolve returns the long URL for a short code
+// and update click statistics
+func (s *Service) Resolve(
+	ctx context.Context,
+	code string,
+) (*ShortURL, error) {
+	u, err := s.store.Get(ctx, code)
+	if err != nil {
+		logs.Errorf("error resolving short url: %v", err)
+		return nil, ErrNotFound
+	}
+
+	// Check if already expired
+	now := s.clock.Now()
+	if u.IsExpired(now) {
+		logs.Errorf("short url expired")
+		return nil, ErrExpired
+	}
+
+	// Exec the click count
+	if incErr := s.store.IncrementClick(ctx, code, now); incErr != nil {
+		logs.Errorf("error incrementing click count: %v", incErr)
+		return nil, incErr
+	}
+
+	return u, nil
+}
+
 /**
 +================ HELPERS ================+
 */

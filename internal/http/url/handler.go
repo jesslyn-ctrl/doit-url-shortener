@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/go-chi/chi/v5"
 	_domainUrl "github.com/jesslyn-ctrl/doit-url-shortener/internal/domain/url"
 )
 
@@ -45,5 +46,25 @@ func CreateShortURLHandler(svc *_domainUrl.Service, defaultTTL time.Duration) ht
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		_ = json.NewEncoder(w).Encode(res)
+	}
+}
+
+// ResolveHandler handles GET /s/{code}
+func ResolveHandler(svc *_domainUrl.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		code := chi.URLParam(r, "code")
+		if code == "" {
+			http.Error(w, "code is required", http.StatusBadRequest)
+			return
+		}
+
+		res, err := svc.Resolve(r.Context(), code)
+		if err != nil {
+			mapDomainError(w, err)
+			return
+		}
+
+		// Requires for 302 redirect
+		http.Redirect(w, r, res.LongURL, http.StatusFound)
 	}
 }

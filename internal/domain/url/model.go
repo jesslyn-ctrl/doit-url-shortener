@@ -11,3 +11,9 @@ type ShortURL struct {
 	ExpiresAt      time.Time `json:"expires_at"`
 	LastAccessedAt time.Time `json:"last_accessed_at"`
 }
+
+// IsExpired returns true if the short URL is expired
+// it is property of ShortURL
+func (s *ShortURL) IsExpired(now time.Time) bool {
+	return now.After(s.ExpiresAt)
+}
