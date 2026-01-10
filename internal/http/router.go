@@ -2,13 +2,19 @@ package http
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	_domainUrl "github.com/jesslyn-ctrl/doit-url-shortener/internal/domain/url"
 	_httpHealth "github.com/jesslyn-ctrl/doit-url-shortener/internal/http/health"
+	"github.com/jesslyn-ctrl/doit-url-shortener/internal/http/url"
 )
 
-func NewRouter() http.Handler {
+func NewRouter(
+	urlSvc *_domainUrl.Service,
+	defaultTTL time.Duration,
+) http.Handler {
 	r := chi.NewRouter()
 
 	// Use built-in middleware
@@ -18,6 +24,8 @@ func NewRouter() http.Handler {
 
 	// Register health routes
 	_httpHealth.RegisterHealthRoutes(r)
+	// Register url routes
+	url.RegisterUrlRoutes(r, urlSvc, defaultTTL)
 
 	return r
 }
