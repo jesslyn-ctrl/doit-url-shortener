@@ -15,4 +15,5 @@ func RegisterUrlRoutes(
 ) {
 	r.Post("/shorten", CreateShortURLHandler(svc, defaultTTL))
 	r.Get("/s/{code}", ResolveHandler(svc))
+	r.Get("/stats/{code}", GetStatsHandler(svc))
 }

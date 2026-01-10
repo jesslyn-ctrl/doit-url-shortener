@@ -122,6 +122,25 @@ func (s *Service) Resolve(
 	return u, nil
 }
 
+// GetStats returns metadata and statistics for a short URL
+func (s *Service) GetStats(
+	ctx context.Context,
+	code string,
+) (*ShortURL, error) {
+	u, err := s.store.Get(ctx, code)
+	if err != nil {
+		logs.Errorf("error getting short url: %v", err)
+		return nil, ErrNotFound
+	}
+
+	if u.IsExpired(s.clock.Now()) {
+		logs.Errorf("short url expired")
+		return nil, ErrExpired
+	}
+
+	return u, nil
+}
+
 /**
 +================ HELPERS ================+
 */

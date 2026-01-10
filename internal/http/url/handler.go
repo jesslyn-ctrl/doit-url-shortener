@@ -68,3 +68,23 @@ func ResolveHandler(svc *_domainUrl.Service) http.HandlerFunc {
 		http.Redirect(w, r, res.LongURL, http.StatusFound)
 	}
 }
+
+// GetStatsHandler handles GET /stats/{code}
+func GetStatsHandler(svc *_domainUrl.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		code := chi.URLParam(r, "code")
+		if code == "" {
+			http.Error(w, "code is required", http.StatusBadRequest)
+			return
+		}
+
+		res, err := svc.GetStats(r.Context(), code)
+		if err != nil {
+			mapDomainError(w, err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(res)
+	}
+}
