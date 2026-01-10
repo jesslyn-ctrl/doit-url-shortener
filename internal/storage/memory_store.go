@@ -19,6 +19,8 @@ func NewMemoryStore() *MemoryStore {
 	}
 }
 
+// Save stores a ShortURL into memory,
+// if the code already exists, it will be overwritten.
 func (m *MemoryStore) Save(ctx context.Context, u *_domainUrl.ShortURL) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -28,6 +30,7 @@ func (m *MemoryStore) Save(ctx context.Context, u *_domainUrl.ShortURL) error {
 	return nil
 }
 
+// Get retrieves a short URL from memory by its code
 func (m *MemoryStore) Get(
 	ctx context.Context,
 	code string,
@@ -43,6 +46,8 @@ func (m *MemoryStore) Get(
 	return u, nil
 }
 
+// IncrementClick increments the click count of a short URL
+// and updates its last_accessed timestamp
 func (m *MemoryStore) IncrementClick(
 	ctx context.Context,
 	code string,
