@@ -93,3 +93,185 @@ func TestService_CreateShortURL(t *testing.T) {
 		})
 	}
 }
+
+func TestService_Resolve(t *testing.T) {
+	start := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+
+	tests := []struct {
+		name        string
+		setupStore  func() _domainUrl.Store
+		advanceTime time.Duration
+		wantErr     error
+		wantClicks  int64
+	}{
+		{
+			name: "success",
+			setupStore: func() _domainUrl.Store {
+				fs := newFakeStore()
+				fs.data["abc"] = &_domainUrl.ShortURL{
+					Code:      "abc",
+					LongURL:   "https://example.com",
+					CreatedAt: start,
+					ExpiresAt: start.Add(time.Hour),
+				}
+				return fs
+			},
+			wantErr:    nil,
+			wantClicks: 1,
+		},
+		{
+			name: "not found",
+			setupStore: func() _domainUrl.Store {
+				return newFakeStore()
+			},
+			wantErr: _domainUrl.ErrNotFound,
+		},
+		{
+			name: "expired",
+			setupStore: func() _domainUrl.Store {
+				fs := newFakeStore()
+				fs.data["abc"] = &_domainUrl.ShortURL{
+					Code:      "abc",
+					LongURL:   "https://example.com",
+					CreatedAt: start,
+					ExpiresAt: start.Add(time.Minute),
+				}
+				return fs
+			},
+			advanceTime: 2 * time.Minute,
+			wantErr:     _domainUrl.ErrExpired,
+		},
+		{
+			name: "increment click error",
+			setupStore: func() _domainUrl.Store {
+				fs := newFakeStore()
+				fs.data["abc"] = &_domainUrl.ShortURL{
+					Code:      "abc",
+					LongURL:   "https://example.com",
+					CreatedAt: start,
+					ExpiresAt: start.Add(time.Hour),
+				}
+				return &errorIncrementStore{fs}
+			},
+			wantErr: errBoom,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clk := _pkgClk.NewFakeClock(start)
+			store := tt.setupStore()
+			svc := _domainUrl.NewService(store, clk)
+
+			if tt.advanceTime > 0 {
+				clk.Advance(tt.advanceTime)
+			}
+
+			u, err := svc.Resolve(context.Background(), "abc")
+
+			if tt.wantErr != nil {
+				if err == nil || !errors.Is(err, tt.wantErr) {
+					t.Fatalf("expected error %v, got %v", tt.wantErr, err)
+				}
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			if u.ClickCount != tt.wantClicks {
+				t.Fatalf(
+					"expected click_count=%d, got=%d",
+					tt.wantClicks,
+					u.ClickCount,
+				)
+			}
+		})
+	}
+}
+
+func TestService_GetStats(t *testing.T) {
+	start := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+
+	tests := []struct {
+		name        string
+		setupStore  func() _domainUrl.Store
+		advanceTime time.Duration
+		wantErr     error
+		wantClicks  int64
+	}{
+		{
+			name: "success",
+			setupStore: func() _domainUrl.Store {
+				fs := newFakeStore()
+				fs.data["abc"] = &_domainUrl.ShortURL{
+					Code:           "abc",
+					LongURL:        "https://example.com",
+					CreatedAt:      start,
+					ExpiresAt:      start.Add(time.Hour),
+					ClickCount:     5,
+					LastAccessedAt: start.Add(10 * time.Minute),
+				}
+				return fs
+			},
+			wantErr:    nil,
+			wantClicks: 5,
+		},
+		{
+			name: "not found",
+			setupStore: func() _domainUrl.Store {
+				return newFakeStore()
+			},
+			wantErr: _domainUrl.ErrNotFound,
+		},
+		{
+			name: "expired",
+			setupStore: func() _domainUrl.Store {
+				fs := newFakeStore()
+				fs.data["abc"] = &_domainUrl.ShortURL{
+					Code:      "abc",
+					LongURL:   "https://example.com",
+					CreatedAt: start,
+					ExpiresAt: start.Add(time.Minute),
+				}
+				return fs
+			},
+			advanceTime: 2 * time.Minute,
+			wantErr:     _domainUrl.ErrExpired,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clk := _pkgClk.NewFakeClock(start)
+			store := tt.setupStore()
+			svc := _domainUrl.NewService(store, clk)
+
+			if tt.advanceTime > 0 {
+				clk.Advance(tt.advanceTime)
+			}
+
+			stats, err := svc.GetStats(context.Background(), "abc")
+
+			if tt.wantErr != nil {
+				if err == nil || !errors.Is(err, tt.wantErr) {
+					t.Fatalf("expected error %v, got %v", tt.wantErr, err)
+				}
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			if stats.ClickCount != tt.wantClicks {
+				t.Fatalf(
+					"expected click_count=%d, got=%d",
+					tt.wantClicks,
+					stats.ClickCount,
+				)
+			}
+		})
+	}
+}

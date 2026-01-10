@@ -74,3 +74,16 @@ func (a *alwaysExistsStore) Save(context.Context, *_domainUrl.ShortURL) error { 
 func (a *alwaysExistsStore) IncrementClick(context.Context, string, time.Time) error {
 	return nil
 }
+
+// Mock for error increment store
+type errorIncrementStore struct {
+	*fakeStore
+}
+
+func (e *errorIncrementStore) IncrementClick(
+	_ context.Context,
+	_ string,
+	_ time.Time,
+) error {
+	return errBoom
+}
