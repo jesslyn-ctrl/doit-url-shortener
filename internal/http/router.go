@@ -22,6 +22,9 @@ func NewRouter(
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
 
+	// Custom middleware by adding header X-Processing-Time-Micros
+	r.Use(ProcessingTimeMiddleware)
+
 	// Register health routes
 	_httpHealth.RegisterHealthRoutes(r)
 	// Register url routes
