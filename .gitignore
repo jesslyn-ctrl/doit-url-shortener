@@ -48,5 +48,12 @@ Thumbs.db
 *.mov
 *.wmv
 
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
 # Environment variables
 .env
