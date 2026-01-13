@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-chi/chi/v5"
+	chiRouter "github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	_domainUrl "github.com/jesslyn-ctrl/doit-url-shortener/internal/domain/url"
 	_httpHealth "github.com/jesslyn-ctrl/doit-url-shortener/internal/http/health"
@@ -15,7 +15,7 @@ func NewRouter(
 	urlSvc *_domainUrl.Service,
 	defaultTTL time.Duration,
 ) http.Handler {
-	r := chi.NewRouter()
+	r := chiRouter.NewRouter()
 
 	// Use built-in middleware
 	r.Use(middleware.RequestID)

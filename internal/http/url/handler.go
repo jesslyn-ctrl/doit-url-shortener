@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-chi/chi/v5"
+	chiRouter "github.com/go-chi/chi/v5"
 	_domainUrl "github.com/jesslyn-ctrl/doit-url-shortener/internal/domain/url"
 )
 
@@ -52,7 +52,7 @@ func CreateShortURLHandler(svc *_domainUrl.Service, defaultTTL time.Duration) ht
 // ResolveHandler handles GET /s/{code}
 func ResolveHandler(svc *_domainUrl.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		code := chi.URLParam(r, "code")
+		code := chiRouter.URLParam(r, "code")
 		if code == "" {
 			http.Error(w, "code is required", http.StatusBadRequest)
 			return
@@ -72,7 +72,7 @@ func ResolveHandler(svc *_domainUrl.Service) http.HandlerFunc {
 // GetStatsHandler handles GET /stats/{code}
 func GetStatsHandler(svc *_domainUrl.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		code := chi.URLParam(r, "code")
+		code := chiRouter.URLParam(r, "code")
 		if code == "" {
 			http.Error(w, "code is required", http.StatusBadRequest)
 			return

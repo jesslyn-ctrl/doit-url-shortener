@@ -1,8 +1,8 @@
 package health
 
-import "github.com/go-chi/chi/v5"
+import chiRouter "github.com/go-chi/chi/v5"
 
 // RegisterHealthRoutes registers Health-related HTTP routes
-func RegisterHealthRoutes(r chi.Router) {
+func RegisterHealthRoutes(r chiRouter.Router) {
 	r.Get("/health", HealthHandler())
 }
