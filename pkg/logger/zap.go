@@ -8,18 +8,18 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var (
-	coloredLevelStrMap = map[zapcore.Level]Color{
-		zapcore.DebugLevel:  Green,
-		zapcore.InfoLevel:   Blue,
-		zapcore.WarnLevel:   Yellow,
-		zapcore.ErrorLevel:  Red,
-		zapcore.DPanicLevel: Red,
-		zapcore.PanicLevel:  Red,
-		zapcore.FatalLevel:  Red,
-	}
-	defaultLevelColor = Red
-)
+//var (
+//	coloredLevelStrMap = map[zapcore.Level]Color{
+//		zapcore.DebugLevel:  Green,
+//		zapcore.InfoLevel:   Blue,
+//		zapcore.WarnLevel:   Yellow,
+//		zapcore.ErrorLevel:  Red,
+//		zapcore.DPanicLevel: Red,
+//		zapcore.PanicLevel:  Red,
+//		zapcore.FatalLevel:  Red,
+//	}
+//	defaultLevelColor = Red
+//)
 
 // Will be used as the context key to store zap.Logger
 type loggerKeyType string
@@ -124,38 +124,4 @@ func getLogLevel(logLevel string) zapcore.Level {
 	default:
 		return zap.InfoLevel
 	}
-}
-
-func customDevLevelEncoder(level zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
-	levelColor, ok := coloredLevelStrMap[level]
-	if !ok {
-		levelColor = defaultLevelColor
-	}
-	enc.AppendString("[" + levelColor.Add(level.CapitalString()) + "]")
-}
-
-func customProdLevelEncoder(level zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
-	enc.AppendString("[" + level.CapitalString() + "]")
-}
-
-func LogFields(metadata map[string]string) []interface{} {
-	// Retrieve context values
-	traceID := metadata["traceId"]
-	requestUrl := metadata["requestUrl"]
-	username := metadata["username"]
-
-	// Init zap fields
-	fields := []zap.Field{
-		zap.String("username", username),
-		zap.String("traceId", traceID),
-		zap.String("url", requestUrl),
-	}
-
-	// Convert fields to interface
-	interfaceFields := make([]interface{}, len(fields))
-	for i, field := range fields {
-		interfaceFields[i] = field
-	}
-
-	return interfaceFields
 }

@@ -2,8 +2,6 @@ package logger
 
 import (
 	"fmt"
-	"regexp"
-	"strings"
 )
 
 // Color represents a text color.
@@ -23,26 +21,4 @@ const (
 // Init adds the coloring to the given string
 func (c Color) Add(s string) string {
 	return fmt.Sprintf("\x1b[%dm%s\x1b[0m", c, s)
-}
-
-/*
-checkIsStringOneOfOrContained checks whether given string is one of or is included in the given possible strings.
-e.g:
-
-	checkIsStringOneOfOrContained("tests-local", "local", "prod", "tests") => true
-	checkIsStringOneOfOrContained("dev", "local", "prod", "tests") => false
-	checkIsStringOneOfOrContained("development", "dev", "prod", "tests") => true
-	checkIsStringOneOfOrContained("dev", "dev", "prod", "tests") => true
-*/
-func checkIsStringOneOfOrContained(target string, checkAgainst ...string) bool {
-	if len(checkAgainst) < 1 {
-		return false
-	}
-
-	var sb strings.Builder
-	for _, env := range checkAgainst {
-		sb.WriteString(fmt.Sprintf("%s|", env))
-	}
-	reStr := sb.String()
-	return regexp.MustCompile(reStr[:len(reStr)-1]).MatchString(target)
 }

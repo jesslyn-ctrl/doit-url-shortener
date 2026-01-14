@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strconv"
@@ -10,7 +11,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var logs = _logger.GetContextLoggerf(nil)
+var logs = _logger.GetContextLoggerf(context.TODO())
 
 // Config structure for the application
 type Config struct {

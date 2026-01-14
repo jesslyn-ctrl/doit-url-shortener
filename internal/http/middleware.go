@@ -1,19 +1,19 @@
 package http
 
 import (
-	"net/http"
+	stdhttp "net/http"
 	"strconv"
 	"time"
 )
 
 type timingResponseWriter struct {
-	http.ResponseWriter
+	stdhttp.ResponseWriter
 	start time.Time
 }
 
 func (tw *timingResponseWriter) WriteHeader(statusCode int) {
 	elapsed := time.Since(tw.start).Microseconds()
-	tw.Header().Set(
+	tw.ResponseWriter.Header().Set(
 		"X-Processing-Time-Micros",
 		strconv.FormatInt(elapsed, 10),
 	)
@@ -21,10 +21,18 @@ func (tw *timingResponseWriter) WriteHeader(statusCode int) {
 	tw.ResponseWriter.WriteHeader(statusCode)
 }
 
+func (tw *timingResponseWriter) Write(b []byte) (int, error) {
+	tw.ResponseWriter.Header().Set(
+		"X-Processing-Time-Micros",
+		strconv.FormatInt(time.Since(tw.start).Microseconds(), 10),
+	)
+	return tw.ResponseWriter.Write(b)
+}
+
 // ProcessingTimeMiddleware adds X-Processing-Time-Micros header
 // to all HTTP responses
-func ProcessingTimeMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func ProcessingTimeMiddleware(next stdhttp.Handler) stdhttp.Handler {
+	return stdhttp.HandlerFunc(func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
 		tw := &timingResponseWriter{
 			ResponseWriter: w,
 			start:          time.Now(),

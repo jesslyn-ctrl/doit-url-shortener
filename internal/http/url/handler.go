@@ -2,6 +2,7 @@ package url
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"time"
 
@@ -12,7 +13,12 @@ import (
 // CreateShortURLHandler handles POST /shorten
 func CreateShortURLHandler(svc *_domainUrl.Service, defaultTTL time.Duration) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		defer r.Body.Close()
+		defer func(Body io.ReadCloser) {
+			err := Body.Close()
+			if err != nil {
+
+			}
+		}(r.Body)
 
 		var req CreateShortURLRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

@@ -12,7 +12,7 @@ import (
 	_logger "github.com/jesslyn-ctrl/doit-url-shortener/pkg/logger"
 )
 
-var logs = _logger.GetContextLoggerf(nil)
+var logs = _logger.GetContextLoggerf(context.TODO())
 
 const (
 	shortCodeLength = 7

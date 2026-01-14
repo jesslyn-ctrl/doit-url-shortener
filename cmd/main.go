@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,7 +14,7 @@ import (
 	_logger "github.com/jesslyn-ctrl/doit-url-shortener/pkg/logger"
 )
 
-var logs = _logger.GetContextLoggerf(nil)
+var logs = _logger.GetContextLoggerf(context.TODO())
 
 func main() {
 	// 1. Load config from .env
